@@ -5,11 +5,7 @@ import com.animana.assignment.Model.AlbumsData;
 import com.animana.assignment.Model.BooksData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import java.util.*;
 
 @Service
 public class SearchBusinessService {
@@ -19,24 +15,52 @@ public class SearchBusinessService {
     BooksData booksData;
 
     private static int limitToDisplay = 5;
+    private static String searchField;
 
     public ArrayList<Resources> getResources(String searchField) {
+        this.searchField = searchField;
 
-        //Object albumObject = albumsData.getAlbums(searchField, "nl");
-        ArrayList<Resources> bookResources;
+        ArrayList<Resources> bookResource;
+        ArrayList<Resources> albumResource;
+        List<ArrayList<Resources>> bookAndAlbumResourcesList = new ArrayList<>();
+
         try {
-            bookResources = booksData.getBooks(searchField);
+            bookResource = booksData.getBooks(searchField);
         } catch (NullPointerException e) {
             return null;
         }
-        ArrayList<Resources> restrictedBookAlbumResources = new ArrayList<>();
 
-        if (bookResources.size() < limitToDisplay) {
-            limitToDisplay = bookResources.size();
+        try {
+            albumResource = albumsData.getAlbums(searchField, "nl");
+        } catch (NullPointerException e) {
+            return null;
         }
-        for (int i = 0; i < limitToDisplay; i++) {
-            restrictedBookAlbumResources.add(bookResources.get(i));
+
+        bookAndAlbumResourcesList.add(0, albumResource);
+        bookAndAlbumResourcesList.add(1, bookResource);
+
+        return this.getRestrictedCombinedResources(bookAndAlbumResourcesList);
+    }
+
+    public ArrayList<Resources> getRestrictedCombinedResources(List<ArrayList<Resources>> bookAndAlbumResourcesArrayList) {
+        int counter = 0;
+        ArrayList<Resources> restrictedCombinedResource = new ArrayList<>();
+        for (int i = 0; i < bookAndAlbumResourcesArrayList.size(); i++) {
+            ArrayList<Resources> individualResource = bookAndAlbumResourcesArrayList.get(i);
+            if (individualResource.size() < limitToDisplay) {
+                limitToDisplay = individualResource.size();
+            }
+            for (int j = counter; j < limitToDisplay + counter; j++) {
+                restrictedCombinedResource.add(individualResource.get(j));
+            }
+            counter = limitToDisplay;
         }
-        return restrictedBookAlbumResources;
+        Collections.sort(restrictedCombinedResource, new Comparator<Resources>() {
+            @Override
+            public int compare(Resources o1, Resources o2) {
+                return o1.title.toLowerCase().compareTo(o2.title.toLowerCase());
+            }
+        });
+        return restrictedCombinedResource;
     }
 }

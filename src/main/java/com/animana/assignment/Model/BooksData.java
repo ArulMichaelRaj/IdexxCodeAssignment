@@ -35,6 +35,9 @@ public class BooksData {
             LinkedHashMap volumeInfo = (LinkedHashMap) item.get("volumeInfo");
             Resources resources = new Resources();
             resources.setTitle((String) volumeInfo.get("title"));
+            if (volumeInfo.get("title") == null) {
+                resources.setTitle("Null value");
+            }
             ArrayList<String> authors = (ArrayList<String>) volumeInfo.get("authors");
             resources.setAuthor(authors.get(0));
             resources.setType("Books");
