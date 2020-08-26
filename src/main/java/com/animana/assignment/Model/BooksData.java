@@ -3,9 +3,12 @@ package com.animana.assignment.Model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+
+/*
+ * This class consumes the book api and stores only Title, Author & Type to the Resources model
+ * */
 
 @Repository
 public class BooksData {

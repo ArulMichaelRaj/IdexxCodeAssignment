@@ -2,15 +2,17 @@ package com.animana.assignment.Model;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.Map;
+
+
+/*
+* This class consumes the album api and stores only Title, Author & Type to the Resources model
+* */
 
 @Repository
 public class AlbumsData {

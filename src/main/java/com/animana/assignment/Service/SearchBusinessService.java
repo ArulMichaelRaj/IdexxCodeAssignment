@@ -5,7 +5,16 @@ import com.animana.assignment.Model.AlbumsData;
 import com.animana.assignment.Model.BooksData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.*;
+
+/*
+ * This class acts as the service interface which receives the keyword to be searched in albums/music api
+ * Sends the request to Data layer and recieves the resources individually
+ * The recieved resources is combined and limited to the number specified in the properties
+ *
+ * */
+
 
 @Service
 public class SearchBusinessService {
@@ -15,32 +24,38 @@ public class SearchBusinessService {
     BooksData booksData;
 
     private static int limitToDisplay = 5;
-    private static String searchField;
 
     public ArrayList<Resources> getResources(String searchField) {
-        this.searchField = searchField;
-
-        ArrayList<Resources> bookResource;
-        ArrayList<Resources> albumResource;
+        ArrayList<Resources> bookResource = null;
+        ArrayList<Resources> albumResource = null;
         List<ArrayList<Resources>> bookAndAlbumResourcesList = new ArrayList<>();
-
-        try {
-            bookResource = booksData.getBooks(searchField);
-        } catch (NullPointerException e) {
-            return null;
-        }
+        boolean bookResults = true, albumResults = true;
 
         try {
             albumResource = albumsData.getAlbums(searchField, "nl");
+            if(albumResource.size()!=0)
+            bookAndAlbumResourcesList.add(0, albumResource);
         } catch (NullPointerException e) {
-            return null;
+            bookResults=false;
         }
 
-        bookAndAlbumResourcesList.add(0, albumResource);
-        bookAndAlbumResourcesList.add(1, bookResource);
+        try {
+            bookResource = booksData.getBooks(searchField);
+            if(bookResource.size()!=0)
+            bookAndAlbumResourcesList.add(1, bookResource);
+        } catch (NullPointerException e) {
+            bookResults=false;
+        }
+
+        if (bookAndAlbumResourcesList.size()==0){return null;}
+        if(bookResults==false & albumResults==false){return null;}
 
         return this.getRestrictedCombinedResources(bookAndAlbumResourcesList);
     }
+
+    /*
+     * This method does restricts the result to the numbers mentioed in properties file
+     * */
 
     public ArrayList<Resources> getRestrictedCombinedResources(List<ArrayList<Resources>> bookAndAlbumResourcesArrayList) {
         int counter = 0;
@@ -55,6 +70,7 @@ public class SearchBusinessService {
             }
             counter = limitToDisplay;
         }
+
         Collections.sort(restrictedCombinedResource, new Comparator<Resources>() {
             @Override
             public int compare(Resources o1, Resources o2) {
